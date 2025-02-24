@@ -1,12 +1,20 @@
 package com.trtho.lab3_listview3;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.trtho.lab3_listview3.adapter.FruitAdapter;
@@ -21,6 +29,21 @@ public class ListView_3 extends AppCompatActivity {
     private ArrayList<Fruit> fruitList;
     private int selectedPosition = -1; // Vị trí item đang được chọn
 
+    private EditText etName;
+    private EditText etDescription;
+    private ImageView ivFruit;
+
+    private Uri imageUri;
+    private static final int PICK_IMAGE_REQUEST = 1;
+
+    private final ActivityResultLauncher<Intent> imagePickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    imageUri = result.getData().getData();
+                    ivFruit.setImageURI(imageUri);
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +54,9 @@ public class ListView_3 extends AppCompatActivity {
         Button btnEdit = findViewById(R.id.btnEdit);
         Button btnDelete = findViewById(R.id.btnDelete);
         Button btnClose = findViewById(R.id.btnClose);
+        etName = findViewById(R.id.editTextText3);
+        etDescription = findViewById(R.id.etDescription);
+        ivFruit = findViewById(R.id.ivFruit);
 
         // Dữ liệu ban đầu
         fruitList = new ArrayList<>();
@@ -42,21 +68,45 @@ public class ListView_3 extends AppCompatActivity {
         listView.setAdapter(adapter);
 
         // Chọn item trong ListView
-        listView.setOnItemClickListener((parent, view, position, id) -> selectedPosition = position);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedPosition = position;
+            Fruit fruit = fruitList.get(position);
+            etName.setText(fruit.getName());
+            etDescription.setText(fruit.getDescription());
+            if (fruit.getImageId() != null) {
+                ivFruit.setImageResource(fruit.getImageId());
+            } else if (fruit.getUri() != null) {
+                ivFruit.setImageURI(fruit.getUri());
+            }
+        });
 
         // Thêm item mới
         btnAdd.setOnClickListener(v -> {
-            fruitList.add(new Fruit("Cam vàng", "Cam Vàng Cái Bè", R.drawable.camvang));
+            String name = etName.getText().toString();
+            String description = etDescription.getText().toString();
+            if (name.isEmpty() || description.isEmpty()) {
+                Toast.makeText(ListView_3.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            fruitList.add(new Fruit(name, description, imageUri));
             adapter.notifyDataSetChanged();
-            Toast.makeText(ListView_3.this, "Đã thêm Cam Vàng", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ListView_3.this, "Đã thêm " + name, Toast.LENGTH_SHORT).show();
         });
 
         // Sửa item
         btnEdit.setOnClickListener(v -> {
             if (selectedPosition != -1) {
+                if (etName.getText().toString().isEmpty() || etDescription.getText().toString().isEmpty()) {
+                    Toast.makeText(ListView_3.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Fruit fruit = fruitList.get(selectedPosition);
-                fruit.setName(fruit.getName() + " (Updated)");
-                fruit.setDescription("Đã cập nhật mô tả");
+                fruit.setName(etName.getText().toString());
+                fruit.setDescription(etDescription.getText().toString());
+                if (imageUri != null) {
+                    fruit.setUri(imageUri);
+                    fruit.setImageId(null);
+                }
                 adapter.notifyDataSetChanged();
                 Toast.makeText(ListView_3.this, "Đã cập nhật " + fruit.getName(), Toast.LENGTH_SHORT).show();
             } else {
@@ -89,6 +139,12 @@ public class ListView_3 extends AppCompatActivity {
             public void onClick(View v) {
                 finish();
             }
+        });
+
+        ivFruit.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            imagePickerLauncher.launch(intent);
         });
     }
 }

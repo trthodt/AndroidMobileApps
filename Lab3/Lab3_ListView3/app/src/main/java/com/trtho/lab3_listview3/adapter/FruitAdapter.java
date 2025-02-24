@@ -23,9 +23,6 @@ public class FruitAdapter extends BaseAdapter {
     private Context context;
     private List<Fruit> fruits;
 
-
-
-
     @Override
     public int getCount() {
         return this.fruits.size();
@@ -62,7 +59,11 @@ public class FruitAdapter extends BaseAdapter {
 
         //+Gán dữ liệu vào giao diện:
         // Đặt ảnh, tên và mô tả vào ImageView và TextView.
-        imgFruit.setImageResource(fruit.getImageId());
+        if (fruit.getImageId() != null) {
+            imgFruit.setImageResource(fruit.getImageId());
+        } else if (fruit.getUri() != null) {
+            imgFruit.setImageURI(fruit.getUri());
+        }
         txtName.setText(fruit.getName());
         txtDescription.setText(fruit.getDescription());
 
