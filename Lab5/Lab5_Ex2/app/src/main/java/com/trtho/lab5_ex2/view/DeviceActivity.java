@@ -31,11 +31,12 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     private DeviceAdapter deviceAdapter;
     private DevicePresenter devicePresenter;
 
-    private Button btnAdd, btnUpdate, btnDelete;
+    private Button btnAdd, btnUpdate, btnDelete, btnInfo;
     private EditText etName, etDescription;
     private ImageView imgChoose;
 
     private int selectedPosition = -1;
+    private Device selectedDevice = null;
 
     private Uri imageUri;
     private int rsId = -1;
@@ -62,6 +63,7 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         etDescription = findViewById(R.id.etDescription);
         imgChoose = findViewById(R.id.imgChoose);
         rcvDeviceList = findViewById(R.id.rcvDeviceList);
+        btnInfo = findViewById(R.id.btnInfo);
 
 
         rcvDeviceList.setLayoutManager(new LinearLayoutManager(this));
@@ -113,6 +115,24 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
                 }
         );
 
+        btnInfo.setOnClickListener(view -> {
+                    if (selectedPosition == -1) {
+                        showMessage("Vui lòng chọn thiết bị để xem thông tin");
+                        return;
+                    }
+                    Intent intent = new Intent(this, DeviceInfoActivity.class);
+                    intent.putExtra("name",selectedDevice.getName());
+                    intent.putExtra("description",selectedDevice.getDescription());
+                    if (selectedDevice.getImageId() != null) {
+                        intent.putExtra("imageId",selectedDevice.getImageId());
+                    } else {
+                        intent.putExtra("imageUri",selectedDevice.getUri());
+                    }
+                    startActivity(intent);
+                    finish();
+
+        });
+
         btnDelete.setOnClickListener(view -> {
                     if (selectedPosition == -1) {
                         showMessage("Vui lòng chọn thiết bị để xóa");
@@ -138,6 +158,7 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     @Override
     public void setDevice(int position,Device device) {
         this.selectedPosition = position;
+        this.selectedDevice = device;
         etName.setText(device.getName());
         etDescription.setText(device.getDescription());
         if (device.getImageId() != null) {
@@ -158,5 +179,6 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         imgChoose.setImageURI(null);
         imgChoose.setImageResource(R.drawable.device);
         selectedPosition = -1;
+        selectedDevice = null;
     }
 }
