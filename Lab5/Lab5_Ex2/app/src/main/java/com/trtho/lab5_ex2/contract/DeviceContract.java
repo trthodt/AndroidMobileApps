@@ -9,6 +9,7 @@ public interface DeviceContract {
         void showDevices(List<Device> devices);
         void showMessage(String message);
         void setDevice(int position,Device device);
+        void notifyDataChanged();
     }
     interface Presenter {
         void loadDevices();

@@ -27,20 +27,20 @@ public class DevicePresenter implements DeviceContract.Presenter{
     public void addDevice(Device device) {
         list.add(device);
         view.showMessage("Thêm thành công");
-        view.showDevices(list);
+        view.notifyDataChanged();
     }
 
     @Override
     public void deleteDevice(int position) {
         list.remove(position);
         view.showMessage("Xóa thành công");
-        view.showDevices(list);
+        view.notifyDataChanged();
     }
 
     @Override
     public void updateDevice(int position, Device device) {
         list.set(position, device);
         view.showMessage("Cập nhật thành công");
-        view.showDevices(list);
+        view.notifyDataChanged();
     }
 }

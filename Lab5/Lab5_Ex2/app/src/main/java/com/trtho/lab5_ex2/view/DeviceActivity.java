@@ -1,6 +1,7 @@
 package com.trtho.lab5_ex2.view;
 
 import android.app.Activity;
+import android.app.ComponentCaller;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +14,8 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +53,18 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
                 }
             });
 
+    private ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        String resultData = data.getStringExtra("message");
+                        Toast.makeText(this, "Thiết bị vừa xem: " + resultData, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +92,10 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         });
 
         btnAdd.setOnClickListener(view -> {
+                    if (etName.getText().toString().isEmpty() || etDescription.getText().toString().isEmpty()) {
+                        Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Device device = new Device();
                     device.setName(etName.getText().toString());
                     device.setDescription(etDescription.getText().toString());
@@ -98,6 +117,10 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
                         showMessage("Vui lòng chọn thiết bị để cập nhật");
                         return;
                     }
+                    if (etName.getText().toString().isEmpty() || etDescription.getText().toString().isEmpty()) {
+                        Toast.makeText(this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     Device newDevice = new Device();
                     newDevice.setName(etName.getText().toString());
                     newDevice.setDescription(etDescription.getText().toString());
@@ -110,44 +133,43 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
                         return;
                     }
                     newDevice.setUri(imageUri);
-                    devicePresenter.updateDevice(selectedPosition,newDevice);
+                    devicePresenter.updateDevice(selectedPosition, newDevice);
                     clear();
                 }
         );
 
         btnInfo.setOnClickListener(view -> {
-                    if (selectedPosition == -1) {
-                        showMessage("Vui lòng chọn thiết bị để xem thông tin");
-                        return;
-                    }
-                    Intent intent = new Intent(this, DeviceInfoActivity.class);
-                    intent.putExtra("name",selectedDevice.getName());
-                    intent.putExtra("description",selectedDevice.getDescription());
-                    if (selectedDevice.getImageId() != null) {
-                        intent.putExtra("imageId",selectedDevice.getImageId());
-                    } else {
-                        intent.putExtra("imageUri",selectedDevice.getUri());
-                    }
-                    startActivity(intent);
-                    finish();
-
+            if (selectedPosition == -1) {
+                showMessage("Vui lòng chọn thiết bị để xem thông tin");
+                return;
+            }
+            Intent intent = new Intent(this, DeviceInfoActivity.class);
+            intent.putExtra("name", selectedDevice.getName());
+            intent.putExtra("description", selectedDevice.getDescription());
+            if (selectedDevice.getImageId() != null) {
+                intent.putExtra("imageId", selectedDevice.getImageId());
+            } else {
+                intent.putExtra("imageUri", selectedDevice.getUri());
+            }
+            activityResultLauncher.launch(intent);
         });
 
         btnDelete.setOnClickListener(view -> {
-                    if (selectedPosition == -1) {
-                        showMessage("Vui lòng chọn thiết bị để xóa");
-                        return;
-                    }
-                    devicePresenter.deleteDevice(selectedPosition);
-                    clear();
+            if (selectedPosition == -1) {
+                showMessage("Vui lòng chọn thiết bị để xóa");
+                return;
+            }
+            devicePresenter.deleteDevice(selectedPosition);
+            clear();
         });
 
     }
 
     @Override
     public void showDevices(List<Device> devices) {
-        deviceAdapter = new DeviceAdapter(devices, devicePresenter,this);
+        deviceAdapter = new DeviceAdapter(devices, devicePresenter, this);
         rcvDeviceList.setAdapter(deviceAdapter);
+        deviceAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -156,7 +178,7 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     }
 
     @Override
-    public void setDevice(int position,Device device) {
+    public void setDevice(int position, Device device) {
         this.selectedPosition = position;
         this.selectedDevice = device;
         etName.setText(device.getName());
@@ -172,7 +194,12 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         }
     }
 
-    public void clear(){
+    @Override
+    public void notifyDataChanged() {
+        deviceAdapter.notifyDataSetChanged();
+    }
+
+    public void clear() {
         etName.setText("");
         etDescription.setText("");
         imageUri = null;
