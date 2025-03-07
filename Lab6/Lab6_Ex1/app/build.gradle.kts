@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.trtho.lab6_ex1"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.trtho.lab6_ex1"
