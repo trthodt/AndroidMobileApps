@@ -3,7 +3,6 @@ package com.trtho.lab9.views;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,16 +38,21 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     private DeviceAdapter adapter;
     private RecyclerView recyclerView;
     private Button btnAdd, btnUpdate, btnDelete, btnInfo;
-    private EditText etName, etDescription;
+    private EditText etName, etDescription, etImageLink;
     private ImageView imgChoose;
 
-    ActivityResultLauncher<Intent> imagePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Picasso.get().load(result.getData().getData()).placeholder(R.drawable.image_loading).into(imgChoose);
-                    selectedDevice.setImage(result.getData().getData().toString());
+    private ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    if (data != null) {
+                        String resultData = data.getStringExtra("message");
+                        Toast.makeText(this, "Thiết bị vừa xem: " + resultData, Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
+
 
 
     @Override
@@ -73,6 +77,7 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         btnInfo = findViewById(R.id.btnInfo);
         etName = findViewById(R.id.etName);
         etDescription = findViewById(R.id.etDescription);
+        etImageLink = findViewById(R.id.etImageLink);
         imgChoose = findViewById(R.id.imgChoose);
 
         btnAdd.setOnClickListener(this);
@@ -95,12 +100,13 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
             DeviceModel device = new DeviceModel();
             device.setName(etName.getText().toString());
             device.setDescription(etDescription.getText().toString());
-            device.setImage(String.valueOf(imgChoose.getImageAlpha()));
+            device.setImage(etImageLink.getText().toString());
             presenter.addDevice(device);
         } else if (id == R.id.btnUpdate) {
             if (selectedDevice != null) {
                 selectedDevice.setName(etName.getText().toString());
                 selectedDevice.setDescription(etDescription.getText().toString());
+                selectedDevice.setImage(etImageLink.getText().toString());
                 presenter.updateDevice(selectedDevice);
             } else {
                 Toast.makeText(this, "Please select a device to update", Toast.LENGTH_SHORT).show();
@@ -111,10 +117,14 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
             } else {
                 Toast.makeText(this, "Please select a device to delete", Toast.LENGTH_SHORT).show();
             }
-        } else if (id == R.id.imgChoose) {
-            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            intent.setType("image/*");
-            imagePickerLauncher.launch(intent);
+        } else if (id == R.id.btnInfo) {
+            if (selectedDevice != null) {
+                Intent intent = new Intent(this, DeviceInfoActivity.class);
+                intent.putExtra("name", selectedDevice.getName());
+                intent.putExtra("description", selectedDevice.getDescription());
+                intent.putExtra("image", selectedDevice.getImage());
+                activityResultLauncher.launch(intent);
+            }
         }
     }
 
@@ -128,8 +138,8 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         this.selectedPosition = position;
         etName.setText(device.getName());
         etDescription.setText(device.getDescription());
+        etImageLink.setText(device.getImage());
         Picasso.get().load(device.getImage()).placeholder(R.drawable.image_loading).into(imgChoose);
-
     }
 
 }

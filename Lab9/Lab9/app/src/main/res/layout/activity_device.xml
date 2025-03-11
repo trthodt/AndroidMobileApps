@@ -9,8 +9,8 @@
 
     <LinearLayout
         android:id="@+id/linearLayout"
-        android:layout_width="384dp"
-        android:layout_height="213dp"
+        android:layout_width="382dp"
+        android:layout_height="250dp"
         android:layout_marginStart="12dp"
         android:layout_marginTop="44dp"
         android:orientation="vertical"
@@ -24,8 +24,8 @@
 
             <ImageView
                 android:id="@+id/imgChoose"
-                android:layout_width="135dp"
-                android:layout_height="152dp"
+                android:layout_width="141dp"
+                android:layout_height="166dp"
                 app:srcCompat="@android:drawable/ic_menu_gallery"
                 tools:srcCompat="@android:drawable/ic_menu_gallery" />
 
@@ -46,11 +46,19 @@
                 <EditText
                     android:id="@+id/etDescription"
                     android:layout_width="match_parent"
-                    android:layout_height="58dp"
+                    android:layout_height="wrap_content"
                     android:ems="10"
                     android:gravity="start|top"
                     android:hint="Description"
                     android:inputType="textMultiLine" />
+
+                <EditText
+                    android:id="@+id/etImageLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:ems="10"
+                    android:hint="Image Link"
+                    android:inputType="text" />
             </LinearLayout>
         </LinearLayout>
 
