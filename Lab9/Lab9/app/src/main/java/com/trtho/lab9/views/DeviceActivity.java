@@ -97,33 +97,45 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     public void onClick(View view) {
         int id = view.getId();
         if (id == R.id.btnAdd) {
+            if (etName.getText().toString().isEmpty() || etDescription.getText().toString().isEmpty() || etImageLink.getText().toString().isEmpty()){
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                return;
+            }
             DeviceModel device = new DeviceModel();
             device.setName(etName.getText().toString());
             device.setDescription(etDescription.getText().toString());
             device.setImage(etImageLink.getText().toString());
             presenter.addDevice(device);
+            clearSelectedDevice();
         } else if (id == R.id.btnUpdate) {
             if (selectedDevice != null) {
+                if (etName.getText().toString().isEmpty() || etDescription.getText().toString().isEmpty() || etImageLink.getText().toString().isEmpty()){
+                    Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 selectedDevice.setName(etName.getText().toString());
                 selectedDevice.setDescription(etDescription.getText().toString());
                 selectedDevice.setImage(etImageLink.getText().toString());
                 presenter.updateDevice(selectedDevice);
+                clearSelectedDevice();
             } else {
                 Toast.makeText(this, "Please select a device to update", Toast.LENGTH_SHORT).show();
             }
         } else if (id == R.id.btnDelete) {
             if (selectedDevice != null) {
                 presenter.deleteDevice(selectedDevice);
+                clearSelectedDevice();
             } else {
                 Toast.makeText(this, "Please select a device to delete", Toast.LENGTH_SHORT).show();
             }
         } else if (id == R.id.btnInfo) {
             if (selectedDevice != null) {
-                Intent intent = new Intent(this, DeviceInfoActivity.class);
+                Intent intent = new Intent();
                 intent.putExtra("name", selectedDevice.getName());
                 intent.putExtra("description", selectedDevice.getDescription());
                 intent.putExtra("image", selectedDevice.getImage());
-                activityResultLauncher.launch(intent);
+                setResult(RESULT_OK, intent);
+                finish();
             }
         }
     }
@@ -131,6 +143,7 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
     @Override
     public void showDevices(List<DeviceModel> devices) {
         adapter.setDevices(devices);
+        adapter.
     }
 
     public void setSelectedDevice(int position, DeviceModel device) {
@@ -142,4 +155,11 @@ public class DeviceActivity extends AppCompatActivity implements DeviceContract.
         Picasso.get().load(device.getImage()).placeholder(R.drawable.image_loading).into(imgChoose);
     }
 
+    public void clearSelectedDevice() {
+        this.selectedDevice = null;
+        this.selectedPosition = -1;
+        etName.setText("");
+        etDescription.setText("");
+        etImageLink.setText("");
+    }
 }
