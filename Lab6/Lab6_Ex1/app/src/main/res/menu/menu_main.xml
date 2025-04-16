@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item  android:id="@+id/option_search"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/search_24dp"
+        android:title="Search" />
+    <item android:id="@+id/option_settings"
+        android:icon="@drawable/settings_24dp"
+        app:showAsAction="ifRoom"
+        android:title="Settings" />
+    <item  android:id="@+id/option_favorites"
+        android:title="Favorites" />
+    <item  android:id="@+id/option_more"
+        android:title="More">
+        <menu>
+            <item android:id="@+id/option_email"
+                android:title="Email" />
+            <item android:id="@+id/option_phone"
+                android:title="Phone" />
+        </menu>
+    </item>
+</menu>
